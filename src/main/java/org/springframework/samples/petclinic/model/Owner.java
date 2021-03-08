@@ -24,7 +24,9 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotEmpty;
@@ -60,9 +62,23 @@ public class Owner extends Person {
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
 	private Set<Pet> pets;
-
+	
+	//
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "username", referencedColumnName = "username")
+	private User user;
+	//
+	
 	public String getAddress() {
 		return this.address;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public void setAddress(String address) {
@@ -106,6 +122,10 @@ public class Owner extends Person {
 		getPetsInternal().add(pet);
 		pet.setOwner(this);
 	}
+	
+	public boolean removePet(Pet pet) {
+		return getPetsInternal().remove(pet);
+	}
 
 	/**
 	 * Return the Pet with the given name, or null if none found for this Owner.
@@ -114,6 +134,18 @@ public class Owner extends Person {
 	 */
 	public Pet getPet(String name) {
 		return getPet(name, false);
+	}
+	
+	public Pet getPetwithIdDifferent(String name,Integer id) {
+		name = name.toLowerCase();
+		for (Pet pet : getPetsInternal()) {
+			String compName = pet.getName();
+			compName = compName.toLowerCase();
+			if (compName.equals(name) && pet.getId()!=id) {
+				return pet;
+			}
+		}
+		return null;
 	}
 
 	/**
